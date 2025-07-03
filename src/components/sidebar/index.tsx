@@ -30,9 +30,14 @@ function Sidebar({ children }: { children: React.ReactNode }) {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          overflowY: "auto",
+        },
       }}
     >
-      <Box sx={{ width: drawerWidth, p: 2 }}>{children}</Box>
+      <Box sx={{ width: "100%" }}>{children}</Box>
     </Drawer>
   );
 }
