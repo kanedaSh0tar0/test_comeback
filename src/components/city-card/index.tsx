@@ -9,11 +9,14 @@ import { CityWeather } from "../../store/citiesSlice";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useCities } from "../../hooks/useCities";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSidebar } from "../../hooks/useSidebar";
 
 function CityCard({ city }: { city: CityWeather }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { remove, refresh } = useCities();
+  const { close } = useSidebar();
 
   const {
     data: { id, country, weather, temp, name, icon },
@@ -22,7 +25,7 @@ function CityCard({ city }: { city: CityWeather }) {
 
   const handleClick = () => {
     if (refreshing) return;
-
+    close();
     navigate(`/city/${id}`);
   };
 
@@ -35,7 +38,15 @@ function CityCard({ city }: { city: CityWeather }) {
 
   const handleRemove = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
+
     remove(id);
+
+    const currentPath = location.pathname;
+    const isOnDetailsPage = currentPath === `/city/${id}`;
+
+    if (isOnDetailsPage) {
+      navigate("/");
+    }
   };
 
   return (
@@ -90,16 +101,16 @@ function CityCard({ city }: { city: CityWeather }) {
           )}
         </Box>
 
-        <Box display="flex" gap={1}>
+        <Box display="flex" flexDirection="column" gap={1}>
+          <IconButton onClick={handleRemove} disabled={refreshing} size="small">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
           <IconButton
             onClick={handleRefresh}
             disabled={refreshing}
             size="small"
           >
             <RefreshIcon fontSize="small" />
-          </IconButton>
-          <IconButton onClick={handleRemove} disabled={refreshing} size="small">
-            <DeleteIcon fontSize="small" />
           </IconButton>
         </Box>
       </Box>

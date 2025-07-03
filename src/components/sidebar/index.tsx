@@ -1,23 +1,28 @@
-import React, { useState } from "react";
+import React from "react";
 import { Drawer, Box, useMediaQuery, useTheme } from "@mui/material";
 
-const drawerWidth = 280;
+const drawerWidth = 300;
 
-function Sidebar({ children }: { children: React.ReactNode }) {
+interface SidebarProps {
+  isOpen: boolean;
+  onCLose: () => void;
+  children: React.ReactNode;
+}
+
+function Sidebar({ isOpen, onCLose, children }: SidebarProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [open, setOpen] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   if (isMobile) {
     return (
       <Drawer
         component="aside"
-        anchor="left"
-        open={open}
-        onClose={() => setOpen(false)}
+        anchor="right"
+        open={isOpen}
+        onClose={onCLose}
         ModalProps={{ keepMounted: true }}
       >
-        <Box sx={{ width: drawerWidth, p: 2 }}>{children}</Box>
+        <Box sx={{ width: drawerWidth }}>{children}</Box>
       </Drawer>
     );
   }

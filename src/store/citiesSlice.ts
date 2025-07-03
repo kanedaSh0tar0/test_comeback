@@ -1,7 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { addCity, refreshCity } from "./thunk/citiesThunk";
+import { addCity, getTodayForecast, refreshCity } from "./thunk/citiesThunk";
+import { getInitialCities, setCities } from "../utils/cities";
 
-const LOCAL_STORAGE_KEY = "cities";
+export type Hour = {
+  dt: number;
+  temp: number;
+  weather: {
+    description: string;
+    icon: string;
+  };
+};
 
 export type CityWeather = {
   data: {
@@ -11,8 +19,13 @@ export type CityWeather = {
     weather: string;
     icon: string;
     temp: number;
+    feelsLike: number;
+    humidity: number;
+    tempMax: number;
+    tempMin: number;
     coord: { lat: number; lon: number };
   };
+  forecast: { hourly?: Hour[]; loading: boolean };
   refreshing: boolean;
 };
 
@@ -36,13 +49,14 @@ const citiesSlice = createSlice({
       state.items = state.items.filter(
         (city) => city.data.id !== action.payload
       );
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.items));
+
+      setCities(state.items);
     },
     loadCities(state) {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const saved = getInitialCities();
 
       if (saved) {
-        state.items = JSON.parse(saved);
+        state.items = saved;
       }
     },
     clearError(state) {
@@ -51,14 +65,20 @@ const citiesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // ADD CITY
       .addCase(addCity.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(addCity.fulfilled, (state, action) => {
         if (!state.items.find((city) => city.data.id === action.payload.id)) {
-          state.items.push({ data: action.payload, refreshing: false });
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.items));
+          state.items.push({
+            data: action.payload,
+            forecast: { hourly: [], loading: false },
+            refreshing: false,
+          });
+
+          setCities(state.items);
         }
         state.loading = false;
       })
@@ -66,6 +86,7 @@ const citiesSlice = createSlice({
         state.loading = false;
         state.error = (action.payload as string) || "Error adding city";
       })
+      //   REFRESH CITY
       .addCase(refreshCity.pending, (state, action) => {
         const id = action.meta.arg;
 
@@ -81,10 +102,8 @@ const citiesSlice = createSlice({
         }
       })
       .addCase(refreshCity.fulfilled, (state, action) => {
-        const { id, weather, temp, icon } = action.payload;
-
         const refreshIndex = state.items.findIndex(
-          (city) => city.data.id === id
+          (city) => city.data.id === action.payload.id
         );
 
         if (refreshIndex !== -1) {
@@ -92,12 +111,12 @@ const citiesSlice = createSlice({
             ...state.items[refreshIndex].data,
             ...action.payload,
           };
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.items));
+          state.items[refreshIndex].refreshing = false;
+
+          setCities(state.items);
         } else {
           state.error = "Something went wrong";
         }
-
-        state.items[refreshIndex].refreshing = false;
       })
       .addCase(refreshCity.rejected, (state, action) => {
         if (!action.payload) {
@@ -118,6 +137,44 @@ const citiesSlice = createSlice({
         }
 
         state.items[refreshIndex].refreshing = false;
+      })
+      // GET FORECAST
+      .addCase(getTodayForecast.pending, (state, action) => {
+        const city = state.items.find((c) => c.data.id === action.meta.arg);
+
+        if (city) {
+          city.forecast.hourly = undefined;
+          city.forecast.loading = true;
+          state.error = null;
+        }
+      })
+      .addCase(getTodayForecast.fulfilled, (state, action) => {
+        const { id, forecast } = action.payload;
+
+        const city = state.items.find((c) => c.data.id === id);
+
+        if (city) {
+          city.forecast.hourly = forecast.hourly;
+          city.forecast.loading = false;
+        }
+      })
+      .addCase(getTodayForecast.rejected, (state, action) => {
+        if (!action.payload) {
+          state.error = action.error.message ?? "Unknown error";
+          return;
+        }
+
+        const { id, err } = action.payload;
+
+        const cityIndex = state.items.findIndex((city) => city.data.id === id);
+
+        if (cityIndex) {
+          state.error = err;
+        } else {
+          state.error = "Something went wrong";
+        }
+
+        state.items[cityIndex].forecast.loading = false;
       });
   },
 });

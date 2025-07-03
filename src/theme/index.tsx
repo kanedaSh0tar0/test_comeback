@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material/styles";
-import { useState } from "react";
+import { useChangeTheme } from "../hooks/useChangeTheme";
 
 export const lightTheme = createTheme({
   palette: {
@@ -15,10 +15,10 @@ export const darkTheme = createTheme({
 });
 
 function AppTheme({ children }: { children: React.ReactNode }) {
-  const [darkMode, setDarkMode] = useState(false);
+  const { themeMode } = useChangeTheme();
 
   return (
-    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+    <ThemeProvider theme={themeMode === "dark" ? darkTheme : lightTheme}>
       {children}
     </ThemeProvider>
   );

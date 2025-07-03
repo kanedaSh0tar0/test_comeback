@@ -10,7 +10,7 @@ export async function fetchWeatherByCityName(cityName: string, lang = "en") {
     )}&appid=${API_KEY}&units=metric&lang=${lang}`
   );
 
-  if (!res.ok) throw new Error("City not found");
+  if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
   return await res.json();
 }
@@ -20,7 +20,7 @@ export async function fetchWeatherByCityId(cityId: number, lang = "en") {
     `${BASE_URL}?id=${cityId}&appid=${API_KEY}&units=metric&lang=${lang}`
   );
 
-  if (!res.ok) throw new Error("City not found");
+  if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
   return await res.json();
 }
@@ -31,15 +31,12 @@ export async function fetchTodayWeatherForecast(coord: {
 }) {
   const { lat, lon } = coord;
 
-  const res = await fetch(`${DAY_FORECAST}
-        ?lat=${lat}
-        &lon=${lon}
-        &exclude=current,minutely,daily,alerts
-        &units=metric
-        &appid={API_KEY}
-    `);
+  const res = await fetch(
+    `${DAY_FORECAST}?lat=${lat}&lon=${lon}&exclude=current,minutely,daily,alerts&units=metric&appid=${API_KEY}`
+  );
 
-  if (!res.ok) throw new Error("City not found");
+  if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
-  return await res.json();
+  const data = await res.json();
+  return data.hourly;
 }

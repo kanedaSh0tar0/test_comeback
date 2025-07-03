@@ -15,7 +15,7 @@ export default function CityList() {
           px: 1,
           py: 2,
           top: 0,
-          bgcolor: "background.default",
+          bgcolor: "background.paper",
           zIndex: 1,
         }}
       >
@@ -27,13 +27,7 @@ export default function CityList() {
         )}
       </Box>
 
-      <Box
-        role="list"
-        display="flex"
-        flexDirection="column"
-        gap={2}
-        p={2}
-      >
+      <Box role="list" display="flex" flexDirection="column" gap={2} p={2}>
         {cities.map((city) => (
           <CityCard key={city.data.id} city={city} />
         ))}

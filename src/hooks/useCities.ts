@@ -7,10 +7,13 @@ import {
 } from "../store/citiesSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { useEffect } from "react";
-import { fetchWeatherByCityId } from "../utils/weatherApi";
-import { addCity, refreshCity } from "../store/thunk/citiesThunk";
+import {
+  addCity,
+  getTodayForecast,
+  refreshCity,
+} from "../store/thunk/citiesThunk";
 
-export const useCities = () => {
+export function useCities() {
   const dispatch = useAppDispatch<AppDispatch>();
   const {
     items: cities,
@@ -22,18 +25,13 @@ export const useCities = () => {
     dispatch(loadCities());
   }, [dispatch]);
 
-  const add = (city: string) => dispatch(addCity(city));
-  const remove = (id: number) => dispatch(removeCity(id));
+  const add = (city: CityWeather["data"]["name"]) => dispatch(addCity(city));
+  const remove = (id: CityWeather["data"]["id"]) => dispatch(removeCity(id));
   const clearErr = () => dispatch(clearError());
   const refresh = async (cityId: CityWeather["data"]["id"]) =>
     dispatch(refreshCity(cityId));
-
-  const getForecast = (city: CityWeather) => {
-    const coord = city.data.coord;
-
-    try {
-    } catch (e) {}
-  };
+  const getForecast = (id: CityWeather["data"]["id"]) =>
+    dispatch(getTodayForecast(id));
 
   return {
     cities,
@@ -43,5 +41,6 @@ export const useCities = () => {
     remove,
     clearErr,
     refresh,
+    getForecast,
   };
-};
+}

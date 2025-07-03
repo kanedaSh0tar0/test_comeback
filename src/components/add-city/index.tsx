@@ -21,7 +21,7 @@ function AddCity({
 
   return (
     <form onSubmit={handleSubmit}>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={1}>
         <TextField
           label="Add city"
           variant="outlined"
