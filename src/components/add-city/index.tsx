@@ -13,8 +13,6 @@ function AddCity({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!value.trim()) return;
-
     onAdd(value.trim());
     setValue("");
   };

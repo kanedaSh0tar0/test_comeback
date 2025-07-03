@@ -14,11 +14,13 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useCities } from "../../hooks/useCities";
 import { useChangeTheme } from "../../hooks/useChangeTheme";
+import { useSidebar } from "../../hooks/useSidebar";
 
 const sidebarWidth = 300;
 
-function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
+function Navbar() {
   const theme = useTheme();
+  const { open } = useSidebar();
   const isMdDown = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,8 +69,8 @@ function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
             </IconButton>
           )}
 
-          {isMdDown && onMenuClick && (
-            <IconButton onClick={onMenuClick}>
+          {isMdDown && (
+            <IconButton onClick={open}>
               <MenuIcon />
             </IconButton>
           )}

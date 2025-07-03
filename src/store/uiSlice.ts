@@ -3,7 +3,7 @@ import { getInitialTheme, setTheme } from "../utils/theme";
 
 export type Theme = "light" | "dark";
 
-interface UIState {
+export interface UIState {
   sidebarOpen: boolean;
   themeMode: Theme;
 }
