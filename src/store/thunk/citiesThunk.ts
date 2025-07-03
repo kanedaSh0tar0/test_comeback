@@ -6,6 +6,7 @@ import {
   fetchWeatherByCityId,
   fetchWeatherByCityName,
 } from "../../utils/weatherApi";
+import { getInitialCities } from "../../utils/cities";
 
 type CityForecastResult = {
   id: number;
@@ -14,16 +15,20 @@ type CityForecastResult = {
   };
 };
 
+export const loadCities = createAsyncThunk<CityWeather[]>(
+  "cities/loadCities",
+  async () => {
+    const saved = getInitialCities();
+    return saved ?? [];
+  }
+);
+
 export const addCity = createAsyncThunk<CityWeather["data"], string>(
   "cities/addCity",
   async (cityName, { rejectWithValue }) => {
     try {
       const { id, name, sys, weather, main, coord } =
         await fetchWeatherByCityName(cityName);
-
-      const data = await fetchWeatherByCityName(cityName);
-
-      console.log(data, "data");
 
       return {
         id,

@@ -1,6 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { addCity, getTodayForecast, refreshCity } from "./thunk/citiesThunk";
-import { getInitialCities, setCities } from "../utils/cities";
+import {
+  addCity,
+  getTodayForecast,
+  loadCities,
+  refreshCity,
+} from "./thunk/citiesThunk";
+import { setCities } from "../utils/cities";
 
 export type Hour = {
   dt: number;
@@ -49,15 +54,6 @@ const citiesSlice = createSlice({
       state.items = state.items.filter(
         (city) => city.data.id !== action.payload
       );
-
-      setCities(state.items);
-    },
-    loadCities(state) {
-      const saved = getInitialCities();
-
-      if (saved) {
-        state.items = saved;
-      }
     },
     clearError(state) {
       state.error = null;
@@ -77,8 +73,6 @@ const citiesSlice = createSlice({
             forecast: { hourly: [], loading: false },
             refreshing: false,
           });
-
-          setCities(state.items);
         }
         state.loading = false;
       })
@@ -112,8 +106,6 @@ const citiesSlice = createSlice({
             ...action.payload,
           };
           state.items[refreshIndex].refreshing = false;
-
-          setCities(state.items);
         } else {
           state.error = "Something went wrong";
         }
@@ -175,10 +167,26 @@ const citiesSlice = createSlice({
         }
 
         state.items[cityIndex].forecast.loading = false;
-      });
+      })
+      // INITIAL REFRESH
+      .addCase(loadCities.fulfilled, (state, action) => {
+        state.items = action.payload;
+      })
+      //   UPDATE LOCALSTORAGE
+      .addMatcher(
+        (action) =>
+          [
+            addCity.fulfilled.type,
+            refreshCity.fulfilled.type,
+            removeCity.type,
+          ].includes(action.type),
+        (state) => {
+          setCities(state.items);
+        }
+      );
   },
 });
 
-export const { removeCity, loadCities, clearError } = citiesSlice.actions;
+export const { removeCity, clearError } = citiesSlice.actions;
 
 export default citiesSlice.reducer;

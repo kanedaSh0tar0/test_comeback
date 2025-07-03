@@ -1,15 +1,10 @@
 import { RootState, AppDispatch } from "../store";
-import {
-  removeCity,
-  loadCities,
-  clearError,
-  CityWeather,
-} from "../store/citiesSlice";
+import { removeCity, clearError, CityWeather } from "../store/citiesSlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { useEffect } from "react";
 import {
   addCity,
   getTodayForecast,
+  loadCities,
   refreshCity,
 } from "../store/thunk/citiesThunk";
 
@@ -21,10 +16,6 @@ export function useCities() {
     error,
   } = useAppSelector((state: RootState) => state.cities);
 
-  useEffect(() => {
-    dispatch(loadCities());
-  }, [dispatch]);
-
   const add = (city: CityWeather["data"]["name"]) => dispatch(addCity(city));
   const remove = (id: CityWeather["data"]["id"]) => dispatch(removeCity(id));
   const clearErr = () => dispatch(clearError());
@@ -32,6 +23,16 @@ export function useCities() {
     dispatch(refreshCity(cityId));
   const getForecast = (id: CityWeather["data"]["id"]) =>
     dispatch(getTodayForecast(id));
+  const initialLoad = async () => {
+    dispatch(loadCities()).then((result) => {
+      if (loadCities.fulfilled.match(result)) {
+        const cities = result.payload;
+        cities.forEach((city) => {
+          dispatch(refreshCity(city.data.id));
+        });
+      }
+    });
+  };
 
   return {
     cities,
@@ -42,5 +43,6 @@ export function useCities() {
     clearErr,
     refresh,
     getForecast,
+    initialLoad,
   };
 }
